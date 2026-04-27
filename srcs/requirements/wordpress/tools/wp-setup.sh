@@ -1,9 +1,9 @@
 #!/bin/bash
 set -e
 
-DB_PASSWORD=$(cat /run/secrets/db_password)
-WP_ADMIN_PASSWORD=$(cat /run/secrets/credentials | grep WP_ADMIN_PASSWORD | cut -d= -f2)
-WP_USER_PASSWORD=$(cat /run/secrets/credentials | grep WP_USER_PASSWORD | cut -d= -f2)
+DB_PASSWORD=$(cat /run/secrets/db_password.txt)
+WP_ADMIN_PASSWORD=$(cat /run/secrets/credentials.txt | grep WP_ADMIN_PASSWORD | cut -d= -f2)
+WP_USER_PASSWORD=$(cat /run/secrets/credentials.txt | grep WP_USER_PASSWORD | cut -d= -f2)
 
 # Télécharger WordPress si pas encore présent
 if [ ! -f "/var/www/html/wp-config.php" ]; then
