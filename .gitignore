@@ -1,4 +1,4 @@
 # .gitignore
 secrets/
-
+maria.sh
 .env

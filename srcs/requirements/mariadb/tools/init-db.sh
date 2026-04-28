@@ -1,8 +1,8 @@
 #!bin/bash
 set -e
 
-DB_PASSWORD=$(cat /run/secrets/db_password.txt)
-DB_ROOT_PASSWORD=$(cat /run/secrets/db_root_password.txt)
+DB_PASSWORD=$(cat /run/secrets/db_password)
+DB_ROOT_PASSWORD=$(cat /run/secrets/db_root_password)
 
 if [ ! -d "/var/lib/mysql/mysql" ]; then
     echo "Initializing MariaDB data directory..."
