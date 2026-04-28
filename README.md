@@ -169,6 +169,10 @@ WP_ADMIN_PASSWORD=your_wp_admin_password
 WP_USER_PASSWORD=your_wp_user_password
 ```
 
+---
+
+#### 3. Create the `.env` file
+
 Then create the `.env` file from the provided example:
 
 ```bash
@@ -194,7 +198,7 @@ WP_USER_EMAIL=visitor@yourlogin.42.fr
 
 ---
 
-#### 3. Configure the local domain
+#### 4. Configure the local domain
 
 Add the following line to `/etc/hosts` on your VM so that `yourlogin.42.fr` resolves to localhost:
 
@@ -202,7 +206,7 @@ Add the following line to `/etc/hosts` on your VM so that `yourlogin.42.fr` reso
 echo "127.0.0.1  yourlogin.42.fr" | sudo tee -a /etc/hosts
 ```
 
-#### 4. Build and launch
+#### 5. Build and launch
 
 ```bash
 make
@@ -210,7 +214,7 @@ make
 
 This will create the required data directories, build all Docker images, and start all containers in detached mode.
 
-#### 5. Access the site
+#### 6. Access the site
 
 Open your browser and go to:
 
