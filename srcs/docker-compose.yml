@@ -54,14 +54,14 @@ volumes:
     driver_opts:
       type: none
       o: bind
-      device: /home/ebansse/data/wordpress
+      device: /home/maito/data/wordpress
 
   db_data:
     driver: local
     driver_opts:
       type: none
       o: bind
-      device: /home/ebansse/data/mariadb
+      device: /home/maito/data/mariadb
 
 # Réseau bridge personnalisé (obligatoire, host interdit)
 networks:

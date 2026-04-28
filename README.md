@@ -76,6 +76,21 @@ Bind mounts expose a specific path from the host into the container. Named volum
 - `make` and `openssl` available on the VM
 - Port 443 open
 
+#### If Docker is not installed, you can install it with:
+
+```bash
+sudo apt update
+sudo apt install -y docker.io docker-compose
+sudo systemctl enable --now docker
+```
+
+#### If `make` is not installed, you can install it with:
+
+```bash
+sudo apt update
+sudo apt install -y build-essential
+```
+
 ### Setup
 
 #### 1. Clone the repository

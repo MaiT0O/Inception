@@ -1,6 +1,6 @@
 # Makefile (à la racine du projet)
 
-LOGIN    = ebansse
+LOGIN    = maito
 DATA_DIR = /home/$(LOGIN)/data
 
 all: setup up

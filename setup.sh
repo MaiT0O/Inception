@@ -49,7 +49,7 @@ else
     echo -e "${GREEN}✓ credentials.txt already exists${NC}"
 fi
 
-# Générer .env.example s'il n'existe pas
+# Générer .env
 if [ ! -f "srcs/.env" ]; then
     echo -e "${YELLOW}Creating .env with .env.example${NC}"
     cp srcs/.env.example srcs/.env

@@ -7,7 +7,7 @@ RUN apt-get update && apt-get install -y \
 
 # Générer un certificat SSL auto-signé
 RUN openssl req -x509 -nodes -days 365 \
-    -subj "/C=FR/ST=IDF/L=Paris/O=42/CN=ebansse.42.fr" \
+    -subj "/C=FR/ST=IDF/L=Paris/O=42/CN=maito.42.fr" \
     -newkey rsa:2048 \
     -keyout /etc/ssl/private/nginx.key \
     -out /etc/ssl/certs/nginx.crt
