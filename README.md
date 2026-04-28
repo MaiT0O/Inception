@@ -96,7 +96,7 @@ sudo apt install -y build-essential
 #### 1. Clone the repository
 
 ```bash
-git clone https://github.com/yourlogin/inception.git
+git clone https://github.com/MaiT0O/inception.git
 cd inception
 ```
 
