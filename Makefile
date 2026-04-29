@@ -1,14 +1,6 @@
 # Makefile (à la racine du projet)
 
-LOGIN    = maito
-DATA_DIR = /home/$(LOGIN)/data
-
-all: setup up
-
-# Créer les dossiers de données sur l'hôte avant de lancer
-setup:
-	mkdir -p $(DATA_DIR)/wordpress
-	mkdir -p $(DATA_DIR)/mariadb
+all: up
 
 up: setup
 	docker-compose -f srcs/docker-compose.yml up -d --build
@@ -21,7 +13,6 @@ stop:
 
 clean: down
 	docker volume rm $$(docker volume ls -q) 2>/dev/null || true
-	rm -rf $(DATA_DIR)/wordpress/* $(DATA_DIR)/mariadb/*
 
 fclean: clean
 	docker system prune -af
