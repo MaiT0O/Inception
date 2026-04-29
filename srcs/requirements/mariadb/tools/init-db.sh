@@ -24,4 +24,4 @@ fi
 
 echo "Starting MariaDB..."
 # Lancer en foreground — PID 1
-exec mysqld_safe --user=mysql\`${MYSQL_DATABASE}\`
+exec mysqld_safe --user=mysql
