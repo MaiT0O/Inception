@@ -24,6 +24,8 @@ RUN chmod +x /wp-setup.sh
 
 RUN mkdir -p /var/www/html && chown -R www-data:www-data /var/www/html
 
+RUN mkdir -p /run/php && chown www-data:www-data /run/php
+
 WORKDIR /var/www/html
 
 EXPOSE 9000

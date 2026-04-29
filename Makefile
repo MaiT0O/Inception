@@ -2,7 +2,7 @@
 
 all: up
 
-up: setup
+up:
 	docker-compose -f srcs/docker-compose.yml up -d --build
 
 down:
@@ -19,4 +19,4 @@ fclean: clean
 
 re: fclean all
 
-.PHONY: all setup up down stop clean fclean re
+.PHONY: all up down stop clean fclean re
