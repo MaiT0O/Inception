@@ -8,7 +8,15 @@ if [ ! -d "/var/lib/mysql/mysql" ]; then
     echo "Initializing MariaDB data directory..."
     mysql_install_db --user=mysql --datadir=/var/lib/mysql > /dev/null
 
-    mysqld_safe --skip-networking & sleep 5
+    mysqld_safe --skip-networking &
+
+    # Attendre que MariaDB soit vraiment prêt à accepter des connexions
+    echo "Waiting for MariaDB to be ready..."
+    until mysqladmin ping --silent 2>/dev/null; do
+        echo "Not ready yet..."
+        sleep 1
+    done
+    echo "MariaDB is ready!"
 
     mysql -u root <<-EOSQL
         ALTER USER 'root'@'localhost' IDENTIFIED BY '${DB_ROOT_PASSWORD}';
@@ -18,10 +26,15 @@ if [ ! -d "/var/lib/mysql/mysql" ]; then
         FLUSH PRIVILEGES;
 EOSQL
 
-    # Arrêter le serveur temporaire
     mysqladmin -u root -p"${DB_ROOT_PASSWORD}" shutdown
+
+    # Attendre que MariaDB soit complètement arrêté
+    echo "Waiting for shutdown..."
+    until ! mysqladmin ping --silent 2>/dev/null; do
+        sleep 1
+    done
+    echo "Shutdown complete."
 fi
 
 echo "Starting MariaDB..."
-# Lancer en foreground — PID 1
 exec mysqld_safe --user=mysql
