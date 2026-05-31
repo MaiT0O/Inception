@@ -10,6 +10,23 @@ NC='\033[0m' # No Color
 
 echo -e "${BLUE}=== Inception Setup ===${NC}\n"
 
+# Créer les répertoires de données s'ils n'existent pas
+if [ ! -d "/home/maito/data/wordpress" ]; then
+    echo -e "${YELLOW}Creating /home/maito/data/wordpress...${NC}"
+    mkdir -p /home/maito/data/wordpress
+    echo -e "${GREEN}✓ /home/maito/data/wordpress created${NC}"
+else
+    echo -e "${GREEN}✓ /home/maito/data/wordpress already exists${NC}"
+fi
+
+if [ ! -d "/home/maito/data/mariadb" ]; then
+    echo -e "${YELLOW}Creating /home/maito/data/mariadb...${NC}"
+    mkdir -p /home/maito/data/mariadb
+    echo -e "${GREEN}✓ /home/maito/data/mariadb created${NC}"
+else
+    echo -e "${GREEN}✓ /home/maito/data/mariadb already exists${NC}"
+fi
+
 # Créer le dossier secrets s'il n'existe pas
 if [ ! -d "secrets" ]; then
     echo -e "${YELLOW}Creating secrets directory...${NC}"

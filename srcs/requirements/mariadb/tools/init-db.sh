@@ -4,6 +4,16 @@ set -e
 DB_PASSWORD=$(cat /run/secrets/db_password)
 DB_ROOT_PASSWORD=$(cat /run/secrets/db_root_password)
 
+# Vérifier que les variables sont définies
+if [ -z "$MYSQL_DATABASE" ]; then
+    echo "ERROR: MYSQL_DATABASE not set"
+    exit 1
+fi
+if [ -z "$MYSQL_USER" ]; then
+    echo "ERROR: MYSQL_USER not set"
+    exit 1
+fi
+
 if [ ! -d "/var/lib/mysql/mysql" ]; then
     echo "Initializing MariaDB data directory..."
     mysql_install_db --user=mysql --datadir=/var/lib/mysql > /dev/null
