@@ -80,15 +80,24 @@ Bind mounts expose a specific path from the host into the container. Named volum
 
 ```bash
 sudo apt update
-sudo apt install -y docker.io docker-compose
+sudo apt install -y docker.io docker-compose-plugin
 sudo systemctl enable --now docker
 ```
+
+> `docker-compose-plugin` provides the `docker compose` command (without hyphen), which is the modern integrated form. The standalone `docker-compose` binary is deprecated.
 
 #### If `make` is not installed, you can install it with:
 
 ```bash
 sudo apt update
 sudo apt install -y build-essential
+```
+
+#### If `openssl` is not installed, you can install it with:
+
+```bash
+sudo apt update
+sudo apt install -y openssl
 ```
 
 ### Setup
@@ -127,7 +136,7 @@ Output:
 
 Next steps:
 1. Review and customize srcs/.env if needed
-2. Run: docker-compose -f srcs/docker-compose.yml up -d
+2. Run: docker compose -f srcs/docker-compose.yml up -d
 ```
 
 After running the script, you can print the generated passwords at any time:

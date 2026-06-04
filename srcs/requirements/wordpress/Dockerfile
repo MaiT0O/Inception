@@ -8,11 +8,12 @@ RUN apt-get update && apt-get install -y \
     php7.4-mbstring \
     php7.4-xml \
     php7.4-zip \
+    mariadb-client \
+    netcat-openbsd \
     wget \
     curl \
     && rm -rf /var/lib/apt/lists/*
 
-# Installer WP-CLI (outil en ligne de commande pour WordPress)
 RUN curl -O https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar \
     && chmod +x wp-cli.phar \
     && mv wp-cli.phar /usr/local/bin/wp

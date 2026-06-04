@@ -1,23 +1,29 @@
-# Makefile (à la racine du projet)
+USER		= $(shell whoami)
+DATA_DIR	= /home/$(USER)/data
 
 all:	up
 
 up:	setup
-	docker-compose -f srcs/docker-compose.yml up --build
+	docker compose -f srcs/docker-compose.yml up --build
 
 setup:
 	@bash setup.sh
 
 down:
-	docker-compose -f srcs/docker-compose.yml down
+	docker compose -f srcs/docker-compose.yml down
 
 stop:
-	docker-compose -f srcs/docker-compose.yml stop
+	docker compose -f srcs/docker-compose.yml stop
 
 clean:	down
 	docker volume rm $$(docker volume ls -q) 2>/dev/null || true
 
-fclean:	clean
+fclean: clean
+	-docker run --rm --entrypoint sh -v $(DATA_DIR)/mariadb:/data inception_mariadb \
+		-c "find /data -mindepth 1 -delete"
+	-docker run --rm --entrypoint sh -v $(DATA_DIR)/wordpress:/data wordpress \
+		-c "find /data -mindepth 1 -delete"
+	rm -rf $(DATA_DIR)/mariadb $(DATA_DIR)/wordpress
 	docker system prune -af
 
 re:	fclean all
