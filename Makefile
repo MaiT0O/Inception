@@ -7,7 +7,7 @@ up:	setup
 	docker compose -f srcs/docker-compose.yml up --build
 
 setup:
-	@bash setup.sh
+	@bash srcs/requirements/tools/setup.sh
 
 down:
 	docker compose -f srcs/docker-compose.yml down
