@@ -14,7 +14,7 @@
 ### 1. Clone the repository
 
 ```bash
-git clone <https://github.com/MaiT0O/Inception.git> inception
+git clone https://github.com/MaiT0O/Inception.git inception
 cd inception
 ```
 
@@ -33,7 +33,8 @@ MYSQL_DATABASE=wordpress_db
 MYSQL_USER=wpuser
 
 WP_TITLE=My website
-WP_ADMIN_USER=wpmaster          # must NOT contain "admin" or "administrator"
+# must NOT contain "admin" or "administrator"
+WP_ADMIN_USER=wpmaster
 WP_ADMIN_EMAIL=admin@example.com
 WP_USER=visitor
 WP_USER_EMAIL=visitor@example.com
@@ -50,7 +51,17 @@ printf "admin_user\nadmin_pass" > secrets/credentials.txt
 
 > Secrets are injected at runtime via Docker secrets (`/run/secrets/<name>` inside each container). They must never appear in Dockerfiles or be committed to git.
 
-### 4. Configure `/etc/hosts` on the host machine
+### 4. Set your login in `nginx.conf`
+
+Open `srcs/requirements/nginx/conf/nginx.conf` and replace `yourlogin` with your actual 42 login in the `server_name` directive:
+
+```nginx
+server_name yourlogin.42.fr;
+```
+
+This must match the `DOMAIN_NAME` value set in `srcs/.env`.
+
+### 5. Configure `/etc/hosts` on the host machine
 
 ```bash
 echo "127.0.0.1   yourlogin.42.fr" | sudo tee -a /etc/hosts

@@ -222,7 +222,17 @@ WP_USER_EMAIL=visitor@yourlogin.42.fr
 
 ---
 
-#### 4. Configure the local domain
+#### 4. Set your login in `nginx.conf`
+
+Open `srcs/requirements/nginx/conf/nginx.conf` and replace `yourlogin` with your actual 42 login in the `server_name` directive:
+
+```nginx
+server_name yourlogin.42.fr;
+```
+
+This must match the `DOMAIN_NAME` value set in `srcs/.env`.
+
+#### 5. Configure the local domain
 
 Add the following line to `/etc/hosts` on your VM so that `yourlogin.42.fr` resolves to localhost:
 
@@ -230,7 +240,7 @@ Add the following line to `/etc/hosts` on your VM so that `yourlogin.42.fr` reso
 echo "127.0.0.1  yourlogin.42.fr" | sudo tee -a /etc/hosts
 ```
 
-#### 5. Build and launch
+#### 6. Build and launch
 
 ```bash
 make
@@ -238,7 +248,7 @@ make
 
 This will create the required data directories, build all Docker images, and start all containers in detached mode.
 
-#### 6. Access the site
+#### 7. Access the site
 
 Open your browser and go to:
 

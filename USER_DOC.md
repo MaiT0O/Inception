@@ -40,10 +40,54 @@ make fclean
 
 ## Access the website and administration panel
 
-> Make sure your `/etc/hosts` file contains the entry pointing to the VM's IP:
-> ```
-> <VM_IP>   yourlogin.42.fr
-> ```
+### 1. Find your VM's IP address
+
+Run this command **inside the VM**:
+
+```bash
+ip a
+```
+
+Look for the `inet` address on your main network interface (usually `eth0` or `enp0s3`), for example:
+
+```
+2: eth0: ...
+    inet 10.0.2.15/24 ...
+```
+
+The IP here is `10.0.2.15`.
+
+Alternatively:
+
+```bash
+hostname -I | awk '{print $1}'
+```
+
+### 2. Set your login in `nginx.conf`
+
+Before launching the project, make sure `srcs/requirements/nginx/conf/nginx.conf` contains your actual 42 login in the `server_name` directive:
+
+```nginx
+server_name yourlogin.42.fr;
+```
+
+This must match the domain you will use in the browser and in `/etc/hosts`.
+
+### 3. Add the redirect in `/etc/hosts`
+
+Run this command **on the machine you use to browse** (your host OS, not the VM), replacing `<VM_IP>` with the IP found above:
+
+```bash
+echo "<VM_IP>   yourlogin.42.fr" | sudo tee -a /etc/hosts
+```
+
+Verify the entry was added:
+
+```bash
+grep yourlogin.42.fr /etc/hosts
+```
+
+> If you access the site from inside the VM itself, use `127.0.0.1` instead of the VM IP.
 
 | URL | Description |
 |-----|-------------|
