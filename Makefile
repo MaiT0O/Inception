@@ -1,10 +1,10 @@
 USER		= $(shell whoami)
 DATA_DIR	= /home/$(USER)/data
 
-all:	up
+all:	setup up
 
-up:	setup
-	docker compose -f srcs/docker-compose.yml up --build
+up:
+	docker compose -f srcs/docker-compose.yml up -d --build
 
 setup:
 	@bash srcs/requirements/tools/setup.sh

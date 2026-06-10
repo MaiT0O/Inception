@@ -66,6 +66,10 @@ Environment variables (`.env`) are loaded into container memory and are visible 
 
 Bind mounts expose a specific path from the host into the container. Named volumes are managed by Docker and abstract the storage location. The subject requires named volumes (bind mounts are forbidden for the WordPress and database volumes) because they are more portable and Docker can optimize their I/O. The volumes are configured to physically store their data in `/home/yourlogin/data/` on the host.
 
+#### NGINX configuration templating
+
+`srcs/requirements/nginx/conf/nginx.conf` contains `server_name ${DOMAIN_NAME};` and is copied into the image as `/etc/nginx/sites-available/default.template`. At container startup, `nginx-start.sh` runs `envsubst` to render this template into `/etc/nginx/sites-available/default`, replacing `${DOMAIN_NAME}` with the value from `.env`. This way the domain is configured in a single place (`.env`), with no need to hardcode it inside `nginx.conf`.
+
 ---
 
 ## Instructions
@@ -109,106 +113,27 @@ git clone https://github.com/MaiT0O/inception.git
 cd inception
 ```
 
-#### 2. Generate secrets
+#### 2. Configure the local domain
 
-The `secrets/` folder and `srcs/.env` are **not** committed to the repository for security reasons. You need to create them before launching the project.
-
----
-
-##### Option A — Automatic (recommended)
-
-A `setup.sh` script is provided at the root of the project. It generates cryptographically random passwords for all secrets using `openssl rand`, copies `.env.example` to `.env`, and sets correct file permissions (`chmod 600`).
+Add the following line to `/etc/hosts` on your VM so that `yourlogin.42.fr` resolves to localhost:
 
 ```bash
-bash setup.sh
+echo "127.0.0.1  yourlogin.42.fr" | sudo tee -a /etc/hosts
 ```
 
-Output:
-```
-=== Inception Setup ===
+#### 3. Set up secrets and environment
 
-✓ db_password.txt created
-✓ db_root_password.txt created
-✓ credentials.txt created
-✓ .env created
+##### **Option A — Automatic (recommended)**
 
-=== Setup Complete ===
+**A.** Edit `srcs/.env.example` with your values **before** running `make` — `setup.sh` copies it to `srcs/.env` on first run and generates random passwords automatically.
 
-Next steps:
-1. Review and customize srcs/.env if needed
-2. Run: docker compose -f srcs/docker-compose.yml up -d
-```
+> ⚠️ `DOMAIN_NAME` must be set to your login (`yourlogin.42.fr`), and must match the line you added to `/etc/hosts` in step 2. NGINX reads this value from `.env` at container startup (via `envsubst`) to set its `server_name` — no need to edit `nginx.conf` manually.
 
-After running the script, you can print the generated passwords at any time:
-
-```bash
-cat secrets/db_password.txt
-cat secrets/db_root_password.txt
-cat secrets/credentials.txt
-```
-
----
-
-##### Option B — Manual
-
-If you prefer to define your own passwords, create each file by hand:
-
-```bash
-# Create the secrets directory
-mkdir -p secrets
-
-# Database user password
-echo "YourDbPassword42!" > secrets/db_password.txt
-
-# Database root password
-echo "YourRootPassword42!" > secrets/db_root_password.txt
-
-# WordPress admin and user passwords
-cat > secrets/credentials.txt <<EOF
-WP_ADMIN_PASSWORD=YourAdminPassword42!
-WP_USER_PASSWORD=YourUserPassword42!
-EOF
-
-# Restrict file permissions (read/write for owner only)
-chmod 600 secrets/db_password.txt
-chmod 600 secrets/db_root_password.txt
-chmod 600 secrets/credentials.txt
-```
-
-The expected format for each file is:
-
-**`secrets/db_password.txt`** — a single line containing only the password:
-```
-your_db_password
-```
-
-**`secrets/db_root_password.txt`** — a single line containing only the password:
-```
-your_root_db_password
-```
-
-**`secrets/credentials.txt`** — two `KEY=VALUE` lines:
-```
-WP_ADMIN_PASSWORD=your_wp_admin_password
-WP_USER_PASSWORD=your_wp_user_password
-```
-
----
-
-#### 3. Create the `.env` file
-
-Then create the `.env` file from the provided example:
-
-```bash
-cp srcs/.env.example srcs/.env
-```
-
-Open `srcs/.env` and fill in your values:
 
 ```bash
 DOMAIN_NAME=yourlogin.42.fr
 
-MYSQL_DATABASE=wordpress
+MYSQL_DATABASE=wordpress_db
 MYSQL_USER=wpuser
 
 WP_TITLE=My Inception Site
@@ -220,35 +145,70 @@ WP_USER_EMAIL=visitor@yourlogin.42.fr
 
 > ⚠️ `WP_ADMIN_USER` must **not** contain `admin`, `Admin`, `administrator` or `Administrator`.
 
----
-
-#### 4. Set your login in `nginx.conf`
-
-Open `srcs/requirements/nginx/conf/nginx.conf` and replace `yourlogin` with your actual 42 login in the `server_name` directive:
-
-```nginx
-server_name yourlogin.42.fr;
-```
-
-This must match the `DOMAIN_NAME` value set in `srcs/.env`.
-
-#### 5. Configure the local domain
-
-Add the following line to `/etc/hosts` on your VM so that `yourlogin.42.fr` resolves to localhost:
-
-```bash
-echo "127.0.0.1  yourlogin.42.fr" | sudo tee -a /etc/hosts
-```
-
-#### 6. Build and launch
-
+**B.** Launch:
 ```bash
 make
 ```
 
-This will create the required data directories, build all Docker images, and start all containers in detached mode.
+After launch, print the generated passwords at any time:
 
-#### 7. Access the site
+```bash
+cat secrets/db_password.txt
+cat secrets/db_root_password.txt
+cat secrets/credentials.txt
+```
+
+##### **Option B — Manual**
+
+**A.** Choose your own passwords and create all files yourself, then use `make up` to skip `setup.sh`.
+
+Create the secrets with your own passwords:
+
+```bash
+mkdir -p secrets
+
+echo "YourDbPassword" > secrets/db_password.txt
+echo "YourRootPassword" > secrets/db_root_password.txt
+cat > secrets/credentials.txt <<EOF
+WP_ADMIN_PASSWORD=YourAdminPassword
+WP_USER_PASSWORD=YourUserPassword
+EOF
+
+chmod 600 secrets/db_password.txt secrets/db_root_password.txt secrets/credentials.txt
+```
+
+**B.** Create `srcs/.env`:
+
+```bash
+cp srcs/.env.example srcs/.env
+```
+
+Open `srcs/.env` and fill in your values:
+
+```bash
+DOMAIN_NAME=yourlogin.42.fr
+MYSQL_DATABASE=wordpress_db
+MYSQL_USER=wpuser
+WP_TITLE=My Inception Site
+WP_ADMIN_USER=wpmaster
+WP_ADMIN_EMAIL=admin@yourlogin.42.fr
+WP_USER=visitor
+WP_USER_EMAIL=visitor@yourlogin.42.fr
+```
+
+**C.** Create the data directories:
+
+```bash
+mkdir -p ~/data/wordpress ~/data/mariadb
+```
+
+**D.** Launch (skips setup.sh):
+
+```bash
+make up
+```
+
+#### 4. Access the site
 
 Open your browser and go to:
 
@@ -270,13 +230,43 @@ https://yourlogin.42.fr/wp-admin
 
 | Target | Description |
 |---|---|
-| `make` or `make all` | Setup directories, build images, start containers |
-| `make up` | Start containers (build if needed) |
+| `make` or `make all` | Run `setup.sh` then build and start containers (Option A) |
+| `make up` | Build and start containers without running `setup.sh` (Option B) |
+| `make setup` | Run `setup.sh` only (generate secrets, copy `.env`) |
 | `make down` | Stop and remove containers |
 | `make stop` | Stop containers without removing them |
 | `make clean` | Remove containers and clear volume data |
 | `make fclean` | Full cleanup including Docker images and system cache |
 | `make re` | Full clean rebuild |
+
+---
+
+### Debugging — logs and containers
+
+Containers run detached (`-d`), so nothing is printed to your terminal after `make`. Use these commands to inspect what's happening:
+
+```bash
+# List running containers and their status
+docker ps
+
+# Follow logs from all services in real time
+docker compose -f srcs/docker-compose.yml logs -f
+
+# Follow logs from a single service
+docker compose -f srcs/docker-compose.yml logs -f nginx
+docker compose -f srcs/docker-compose.yml logs -f wordpress
+docker compose -f srcs/docker-compose.yml logs -f mariadb
+
+# Open a shell inside a running container
+docker exec -it nginx bash
+docker exec -it wordpress bash
+docker exec -it mariadb bash
+
+# Check the rendered NGINX config (after envsubst)
+docker exec -it nginx cat /etc/nginx/sites-available/default
+```
+
+If a container keeps restarting, `docker ps` will show it cycling and `docker compose logs -f <service>` will show the error that caused the crash.
 
 ---
 

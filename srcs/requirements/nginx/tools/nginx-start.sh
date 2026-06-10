@@ -1,6 +1,8 @@
 #!/bin/bash
 set -e
 
+envsubst '${DOMAIN_NAME}' < /etc/nginx/sites-available/default.template > /etc/nginx/sites-available/default
+
 echo "Waiting for WordPress to be ready..."
 
 until nc -z wordpress 9000; do

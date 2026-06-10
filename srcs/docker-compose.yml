@@ -5,6 +5,7 @@ services:
     image: nginx
     container_name: nginx
     restart: always
+    env_file: .env
     ports:
       - "443:443"
     volumes:
