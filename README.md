@@ -84,11 +84,25 @@ Bind mounts expose a specific path from the host into the container. Named volum
 
 ```bash
 sudo apt update
-sudo apt install -y docker.io docker-compose-plugin
+sudo apt install -y docker.io docker-compose
 sudo systemctl enable --now docker
 ```
 
-> `docker-compose-plugin` provides the `docker compose` command (without hyphen), which is the modern integrated form. The standalone `docker-compose` binary is deprecated.
+> `docker-compose` provides the `docker compose` command (without hyphen), which is the modern integrated form. The standalone `docker-compose` binary is deprecated.
+
+Then add the user to the docker group with:
+
+```bash
+sudo usermod -aG docker $USER
+```
+
+#### Realod the session with `newgrp`
+
+```bash
+sudo apt update
+sudo apt install util-linux-extra
+newgrp docker
+```
 
 #### If `make` is not installed, you can install it with:
 
