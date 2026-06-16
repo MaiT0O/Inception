@@ -33,7 +33,7 @@ services:
 
   mariadb:
     build: ./requirements/mariadb
-    image: inception_mariadb
+    image: mariadb
     container_name: mariadb
     restart: always
     env_file: .env
@@ -45,7 +45,6 @@ services:
     networks:
       - inception
 
-# Named volumes — data stored in /home/login/data
 volumes:
   wordpress_data:
     driver: local
@@ -61,12 +60,10 @@ volumes:
       o: bind
       device: ${HOME}/data/mariadb
 
-# Custom bridge network (required — host network is forbidden)
 networks:
   inception:
     driver: bridge
 
-# Secrets — read from local files
 secrets:
   db_password:
     file: ../secrets/db_password.txt

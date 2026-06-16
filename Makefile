@@ -19,7 +19,7 @@ clean:	down
 	docker volume rm $$(docker volume ls -q) 2>/dev/null || true
 
 fclean: clean
-	-docker run --rm --entrypoint sh -v $(DATA_DIR)/mariadb:/data inception_mariadb \
+	-docker run --rm --entrypoint sh -v $(DATA_DIR)/mariadb:/data mariadb \
 		-c "find /data -mindepth 1 -delete"
 	-docker run --rm --entrypoint sh -v $(DATA_DIR)/wordpress:/data wordpress \
 		-c "find /data -mindepth 1 -delete"

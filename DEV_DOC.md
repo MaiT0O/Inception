@@ -3,9 +3,18 @@
 ## Prerequisites
 
 - Docker and Docker Compose (v2) installed on the VM
-- `make` available
-- A Linux VM (Debian or Alpine recommended)
-- default login is `yourlogin` in config files — adjust paths if needed
+- `make` and `openssl` available
+- A Linux VM (Debian recommended)
+
+#### If Docker is not installed:
+
+```bash
+sudo apt update
+sudo apt install -y docker.io docker-compose
+sudo systemctl enable --now docker
+sudo usermod -aG docker $USER
+newgrp docker
+```
 
 ---
 
@@ -14,17 +23,21 @@
 ### 1. Clone the repository
 
 ```bash
-git clone https://github.com/MaiT0O/Inception.git inception
+git clone https://github.com/MaiT0O/inception.git
 cd inception
 ```
 
-### 2. Create the `.env` file
+### 2. Configure `/etc/hosts`
 
 ```bash
-cp srcs/.env.example srcs/.env
+echo "127.0.0.1   yourlogin.42.fr" | sudo tee -a /etc/hosts
 ```
 
-Edit `srcs/.env` and fill in your values:
+### 3. Configure the environment and launch
+
+#### Option A — Automatic (recommended)
+
+Edit `srcs/.env.example` with your values **before** running `make`:
 
 ```env
 DOMAIN_NAME=yourlogin.42.fr
@@ -32,40 +45,58 @@ DOMAIN_NAME=yourlogin.42.fr
 MYSQL_DATABASE=wordpress_db
 MYSQL_USER=wpuser
 
-WP_TITLE=My website
+WP_TITLE=My Inception Site
 # must NOT contain "admin" or "administrator"
 WP_ADMIN_USER=wpmaster
-WP_ADMIN_EMAIL=admin@example.com
+WP_ADMIN_EMAIL=admin@yourlogin.42.fr
 WP_USER=visitor
-WP_USER_EMAIL=visitor@example.com
+WP_USER_EMAIL=visitor@yourlogin.42.fr
 ```
 
-### 3. Create the secrets files
+Then launch — `setup.sh` copies `.env.example` to `srcs/.env` and generates random passwords automatically:
+
+```bash
+make
+```
+
+> `DOMAIN_NAME` is read by NGINX at container startup via `envsubst` — no need to edit `nginx.conf` manually.
+
+#### Option B — Manual
+
+Create the secrets with your own passwords:
 
 ```bash
 mkdir -p secrets
-echo "your_db_password"      > secrets/db_password.txt
-echo "your_root_password"    > secrets/db_root_password.txt
-printf "admin_user\nadmin_pass" > secrets/credentials.txt
+
+echo "YourDbPassword" > secrets/db_password.txt
+echo "YourRootPassword" > secrets/db_root_password.txt
+cat > secrets/credentials.txt <<EOF
+WP_ADMIN_PASSWORD=YourAdminPassword
+WP_USER_PASSWORD=YourUserPassword
+EOF
+
+chmod 600 secrets/db_password.txt secrets/db_root_password.txt secrets/credentials.txt
+```
+
+Create `srcs/.env`:
+
+```bash
+cp srcs/.env.example srcs/.env
+```
+
+Create the data directories:
+
+```bash
+mkdir -p ~/data/wordpress ~/data/mariadb
+```
+
+Launch (skips `setup.sh`):
+
+```bash
+make up
 ```
 
 > Secrets are injected at runtime via Docker secrets (`/run/secrets/<name>` inside each container). They must never appear in Dockerfiles or be committed to git.
-
-### 4. Set your login in `nginx.conf`
-
-Open `srcs/requirements/nginx/conf/nginx.conf` and replace `yourlogin` with your actual 42 login in the `server_name` directive:
-
-```nginx
-server_name yourlogin.42.fr;
-```
-
-This must match the `DOMAIN_NAME` value set in `srcs/.env`.
-
-### 5. Configure `/etc/hosts` on the host machine
-
-```bash
-echo "127.0.0.1   yourlogin.42.fr" | sudo tee -a /etc/hosts
-```
 
 ---
 
@@ -73,19 +104,14 @@ echo "127.0.0.1   yourlogin.42.fr" | sudo tee -a /etc/hosts
 
 ```bash
 make        # runs setup + docker compose up --build
+make re     # fclean + all (full rebuild)
 ```
 
-`make setup` (called automatically) creates the data directories on the host:
+`make setup` (called automatically by `make`) creates the data directories on the host:
 - `/home/yourlogin/data/wordpress`
 - `/home/yourlogin/data/mariadb`
 
 These directories are mounted as named volumes inside the containers.
-
-To rebuild everything from scratch after a configuration change:
-
-```bash
-make re     # fclean + all
-```
 
 ---
 
@@ -95,7 +121,8 @@ make re     # fclean + all
 |---------|-------------|
 | `docker ps` | List running containers |
 | `docker logs <name>` | View container logs |
-| `docker exec -it <name> sh` | Open a shell inside a container |
+| `docker compose -f srcs/docker-compose.yml logs -f` | Follow logs from all services |
+| `docker exec -it <name> bash` | Open a shell inside a container |
 | `docker compose -f srcs/docker-compose.yml ps` | Status of all compose services |
 | `docker volume ls` | List Docker named volumes |
 | `docker inspect <volume>` | Inspect volume mount details |
@@ -108,6 +135,12 @@ make re     # fclean + all
 
 ```bash
 docker compose -f srcs/docker-compose.yml up --build nginx
+```
+
+### Check the rendered NGINX config (after envsubst)
+
+```bash
+docker exec -it nginx cat /etc/nginx/sites-available/default
 ```
 
 ### Check MariaDB from inside the container

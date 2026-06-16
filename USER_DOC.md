@@ -4,11 +4,11 @@
 
 This project runs three services inside Docker containers, connected through a private network:
 
-| Service  | Role                                         | Port exposed |
-|----------|----------------------------------------------|--------------|
-| NGINX    | Reverse proxy — only entry point (HTTPS)     | 443 (public) |
-| WordPress | CMS + PHP-FPM                               | internal only |
-| MariaDB  | Database for WordPress                       | internal only |
+| Service   | Role                                         | Port exposed  |
+|-----------|----------------------------------------------|---------------|
+| NGINX     | Reverse proxy — only entry point (HTTPS)     | 443 (public)  |
+| WordPress | CMS + PHP-FPM                                | internal only |
+| MariaDB   | Database for WordPress                       | internal only |
 
 The only port reachable from the outside is **443 (HTTPS / TLSv1.2 or TLSv1.3)**.
 
@@ -40,45 +40,12 @@ make fclean
 
 ## Access the website and administration panel
 
-### 1. Find your VM's IP address
+### 1. Add the domain to `/etc/hosts`
 
-Run this command **inside the VM**:
-
-```bash
-ip a
-```
-
-Look for the `inet` address on your main network interface (usually `eth0` or `enp0s3`), for example:
-
-```
-2: eth0: ...
-    inet 10.0.2.15/24 ...
-```
-
-The IP here is `10.0.2.15`.
-
-Alternatively:
+Run this command **inside the VM**, replacing `yourlogin` with your actual 42 login:
 
 ```bash
-hostname -I | awk '{print $1}'
-```
-
-### 2. Set your login in `nginx.conf`
-
-Before launching the project, make sure `srcs/requirements/nginx/conf/nginx.conf` contains your actual 42 login in the `server_name` directive:
-
-```nginx
-server_name yourlogin.42.fr;
-```
-
-This must match the domain you will use in the browser and in `/etc/hosts`.
-
-### 3. Add the redirect in `/etc/hosts`
-
-Run this command **on the machine you use to browse** (your host OS, not the VM), replacing `<VM_IP>` with the IP found above:
-
-```bash
-echo "<VM_IP>   yourlogin.42.fr" | sudo tee -a /etc/hosts
+echo "127.0.0.1  yourlogin.42.fr" | sudo tee -a /etc/hosts
 ```
 
 Verify the entry was added:
@@ -87,7 +54,7 @@ Verify the entry was added:
 grep yourlogin.42.fr /etc/hosts
 ```
 
-> If you access the site from inside the VM itself, use `127.0.0.1` instead of the VM IP.
+### 2. Open the site
 
 | URL | Description |
 |-----|-------------|
@@ -95,6 +62,8 @@ grep yourlogin.42.fr /etc/hosts
 | `https://yourlogin.42.fr/wp-admin` | WordPress administration panel |
 
 The browser will show a certificate warning — this is expected since the TLS certificate is self-signed. Accept it to continue.
+
+> The domain name is configured in `srcs/.env` (`DOMAIN_NAME=yourlogin.42.fr`). NGINX reads it automatically at startup — no need to edit `nginx.conf` manually.
 
 ---
 
@@ -106,9 +75,17 @@ All credentials are stored **locally** in the `secrets/` folder at the root of t
 |------|---------|
 | `secrets/db_password.txt` | Password for the WordPress database user |
 | `secrets/db_root_password.txt` | MariaDB root password |
-| `secrets/credentials.txt` | WordPress admin username and password |
+| `secrets/credentials.txt` | WordPress admin and user passwords |
 
 Non-sensitive configuration (domain name, database name, usernames) is stored in `srcs/.env` (copied from `srcs/.env.example`).
+
+To print the generated passwords at any time:
+
+```bash
+cat secrets/db_password.txt
+cat secrets/db_root_password.txt
+cat secrets/credentials.txt
+```
 
 To change a credential: edit the relevant file in `secrets/`, then run `make re` to rebuild from scratch.
 
