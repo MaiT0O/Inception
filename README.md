@@ -284,6 +284,39 @@ If a container keeps restarting, `docker ps` will show it cycling and `docker co
 
 ---
 
+### Testing — verify the stack works
+
+```bash
+# All three containers are running
+docker ps
+
+# HTTPS responds
+curl -k https://yourlogin.42.fr
+
+# HTTP is unreachable (connection must be refused)
+curl http://yourlogin.42.fr
+
+# TLS version check
+openssl s_client -connect yourlogin.42.fr:443 2>/dev/null | grep Protocol
+
+# Network is up
+docker network ls
+docker network inspect inception_inception
+
+# Volumes are mounted at the right host paths
+docker volume inspect inception_wordpress_data
+docker volume inspect inception_db_data
+
+# MariaDB: root without password must be denied
+docker exec -it mariadb mariadb -u root
+
+# MariaDB: login with password and check the database is not empty
+docker exec -it mariadb mariadb -u root -p$(cat secrets/db_root_password.txt) \
+  -e "SHOW DATABASES; USE wordpress_db; SHOW TABLES;"
+```
+
+---
+
 ## Resources
 
 ### Official documentation
